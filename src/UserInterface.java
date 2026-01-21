@@ -25,70 +25,64 @@ public class UserInterface {
         while (true) {
             System.out.println();
             System.out.print("Command: ");
-           String commandInput = scanner.nextLine();
+            String commandInput = scanner.nextLine();
             commandProcessor(workout, commandInput);
         }
 
     }
 
     public void commandProcessor(Workout workout, String commandInput) {
-        
+
         if (commandInput.equalsIgnoreCase("help")) {
             System.out.println();
             commandList();
             return;
         } else if (commandInput.equalsIgnoreCase("quit")) {
-            System.exit(0);;
+            System.exit(0);
         } else if (isInteger(commandInput)) {
             int command = Integer.parseInt(commandInput);
 
-            if (command == 1)  {
-            System.out.print("Name: ");
-            String name = scanner.nextLine();
+            if (command == 1) {
+                String name = readNonBlankString("Name: ");
+                int sets = readPositiveInteger("Sets: ");
+                int reps = readPositiveInteger("Reps: ");
+                double weight = readNonNegativeDouble("Weight: ");
 
-            int sets = readPositiveInteger("Sets:");
-            System.out.print("Reps: ");
-            int reps = Integer.valueOf(scanner.nextLine());
-            System.out.print("Weight: ");
-            double weight = Double.valueOf(scanner.nextLine());
+                Exercise exerciseName = new Exercise(name, sets, reps, weight);
+                workout.addExercise(exerciseName);
 
-            Exercise exerciseName = new Exercise(name, sets, reps, weight);
-            workout.addExercise(exerciseName);
+                System.out.println();
+                System.out.println("\u001B[32m" + "Exercise added" + "\u001B[0m");
+                System.out.println();
+            } else if (command == 2) {
+                if (workout.size() == 0) {
+                    noExercisesAddedErrorMessage();
+                    return;
+                }
+                workout.printWorkout();
+                System.out.println();
 
-            System.out.println();
-            System.out.println("\u001B[32m" + "Exercise added" + "\u001B[0m");
-            System.out.println();
-        } else if (command == 2) {
-            if (workout.size() == 0) {
-                noExercisesAddedErrorMessage();
-                return;
-            }
-            workout.printWorkout();
-            System.out.println();
+            } else if (command == 3) {
+                if (workout.size() == 0) {
+                    noExercisesAddedErrorMessage();
+                    return;
+                }
+                System.out.println(workout.calculateTotalWorkoutVolume());
 
-        } else if (command == 3) {
-            if (workout.size() == 0) {
-                noExercisesAddedErrorMessage();
-                return;
-            }
-            System.out.println(workout.calculateTotalWorkoutVolume());
+                System.out.println();
+            } else if (command == 4) {
+                if (workout.size() == 0) {
+                    noExercisesAddedErrorMessage();
+                    return;
+                }
 
-            System.out.println();
-        } else if (command == 4) {
-            if (workout.size() == 0) {
-                noExercisesAddedErrorMessage();
-                return;
-            }
-
-            workout.highestVolumeExercise();
-            System.out.println();
-        } 
-        else 
-            System.out.println("Unknown Command");
+                workout.highestVolumeExercise();
+                System.out.println();
+            } else
+                System.out.println("Unknown command. Type 'help' to see available options");
         } else 
-            System.out.println("Unknown Command");
-        
-        
+            System.out.println("Invalid command number. Type 'help' to see valid commands.");
+
     }
 
     private void commandList() {
@@ -99,6 +93,7 @@ public class UserInterface {
         System.out.println("help - list commands again ");
         System.out.println("quit- quits the program");
     }
+
     private boolean isInteger(String input) {
         try {
             Integer.parseInt(input);
@@ -107,6 +102,20 @@ public class UserInterface {
             return false;
         }
     }
+
+    private String readNonBlankString(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine();
+
+            if (input.isBlank()) {
+                System.out.println("Please enter a non blank name");
+                continue;
+            }
+            return input;
+        }
+    }
+
     private int readPositiveInteger(String prompt) {
         while (true) {
             System.out.print(prompt);
@@ -126,6 +135,27 @@ public class UserInterface {
             return value;
         }
     }
+
+    private double readNonNegativeDouble(String prompt) {
+        while (true) {
+            System.out.print(prompt);
+            String input = scanner.nextLine();
+
+            try {
+                double weight = Double.parseDouble(input);
+                if (weight < 0) {
+                    System.out.println("Please enter a non negative number");
+                    continue;
+                }
+                return weight;
+
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a number");
+                continue;
+            }
+        }
+    }
+
     private void noExercisesAddedErrorMessage() {
         System.out.println("\u001B[31m" + "No exercises are in the workout" + "\u001B[0m");
 
