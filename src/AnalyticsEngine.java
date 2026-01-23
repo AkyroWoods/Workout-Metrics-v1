@@ -9,16 +9,13 @@ public class AnalyticsEngine {
     private double pushVolume;
     private double pullVolume;
     private double legsVolume;
-    private double totalVolume;
     private Exercise highestVolumeExercise;
     private Exercise lowestVolumeExercise;
-    
 
     public void calculateVolumeBreakdown(Workout workout) {
         pushVolume = 0;
         pullVolume = 0;
         legsVolume = 0;
-        totalVolume = totalVolume();
         if (workout.getExercises().isEmpty()) {
             highestVolumeExercise = null;
             lowestVolumeExercise = null;
@@ -29,12 +26,11 @@ public class AnalyticsEngine {
         for (Exercise e : workout.getExercises()) {
             double currentExerciseVolume = e.calculateTotalVolume();
 
-            if (e.classifyExercise().equals("Push")) {
-                pushVolume += currentExerciseVolume;
-            } else if (e.classifyExercise().equals("Pull")) {
-                pullVolume += currentExerciseVolume;
-            } else if (e.classifyExercise().equals("Legs")) {
-                legsVolume += currentExerciseVolume;
+            String category = e.classifyExercise();
+            switch (category) {
+                case "Push" -> pushVolume += currentExerciseVolume;
+                case "Pull" -> pullVolume += currentExerciseVolume;
+                case "Legs" -> legsVolume += currentExerciseVolume;
             }
 
             if (currentExerciseVolume > highestVolumeExercise.calculateTotalVolume()) {
@@ -63,7 +59,7 @@ public class AnalyticsEngine {
         return percentages;
     }
 
-   public Map<Exercise, Double> getSortedExerciseVolumePercentages(Workout workout) {
+    public Map<Exercise, Double> getSortedExerciseVolumePercentages(Workout workout) {
         Map<Exercise, Double> percentages = new HashMap<>();
         List<Map.Entry<Exercise, Double>> sortedPercentages = new ArrayList<>();
         double totalVolume = workout.calculateTotalWorkoutVolume();
@@ -91,24 +87,21 @@ public class AnalyticsEngine {
 
     public List<Map.Entry<Exercise, Double>> topNExercises(Workout workout, int n) {
         Map<Exercise, Double> sorted = getSortedExerciseVolumePercentages(workout);
-        List<Map.Entry<Exercise, Double>> topN = new ArrayList<>();
+        List<Map.Entry<Exercise, Double>> entries = new ArrayList<>(sorted.entrySet());
 
-        int count = 0;
-        for(Map.Entry<Exercise, Double> pair: sorted.entrySet()) {
-            topN.add(pair);
-            if (count >= n) {
-                break;
-            }
-            count++;
-        }
-        return topN;
+        int limit = Math.min(n, entries.size());
+        return entries.subList(0, limit);
     }
+
     public List<Map.Entry<Exercise, Double>> bottomNExercises(Workout workout, int n) {
         Map<Exercise, Double> sorted = getSortedExerciseVolumePercentages(workout);
-
         List<Map.Entry<Exercise, Double>> entries = new ArrayList<>(sorted.entrySet());
+
+        if (entries.size() <= n) {
+            return Collections.emptyList();
+        }
         int size = entries.size();
-        
+
         int start = Math.max(0, size - n);
 
         return entries.subList(start, size);
@@ -123,15 +116,15 @@ public class AnalyticsEngine {
     }
 
     public double getPushPercentage() {
-        return pushVolume / totalVolume;
+        return pushVolume / totalVolume();
     }
 
     public double getPullPercentage() {
-        return pullVolume / totalVolume;
+        return pullVolume / totalVolume();
     }
 
     public double getLegsPercentage() {
-        return legsVolume / totalVolume;
+        return legsVolume / totalVolume();
     }
 
     public Exercise getHighestVolumeExercise() {

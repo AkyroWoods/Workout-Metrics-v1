@@ -1,8 +1,16 @@
 import java.util.Scanner;
 
 public class UserInterface {
+
+    // ===== Color Constants =====
+    private static final String RED = "\u001B[31m";
+    private static final String GREEN = "\u001B[32m";
+    private static final String YELLOW = "\u001B[33m";
+    private static final String CYAN = "\u001B[36m";
+    private static final String RESET = "\u001B[0m";
+
     private Scanner scanner;
-    private AnalyticsEngine engine;
+    private final AnalyticsEngine engine;
 
     public UserInterface(Scanner scanner) {
         this.scanner = scanner;
@@ -10,13 +18,13 @@ public class UserInterface {
     }
 
     public void start() {
-        
-        System.out.print("Name of Workout: ");
+
+        System.out.print(CYAN + "Name of Workout: " + RESET);
         String workoutName = scanner.nextLine();
 
         while (workoutName.isBlank()) {
-            System.out.println("\u001B[31m" + "Invalid workout name" + "\u001B[0m");
-            System.out.print("Name of Workout: ");
+            System.out.println(RED + "Invalid workout name" + RESET);
+            System.out.print(CYAN + "Name of Workout: " + RESET);
             workoutName = scanner.nextLine();
         }
 
@@ -27,11 +35,10 @@ public class UserInterface {
 
         while (true) {
             System.out.println();
-            System.out.print("Command: ");
+            System.out.print(YELLOW + "Command: " + RESET);
             String commandInput = scanner.nextLine();
             commandProcessor(workout, commandInput);
         }
-
     }
 
     public void commandProcessor(Workout workout, String commandInput) {
@@ -41,12 +48,15 @@ public class UserInterface {
             commandList();
             return;
         } else if (commandInput.equalsIgnoreCase("quit")) {
+            System.out.println(YELLOW + "Exiting program..." + RESET);
             System.exit(0);
         }
+
         if (isInteger(commandInput)) {
             int command = Integer.parseInt(commandInput);
 
             switch (command) {
+
                 case 1:
                     String name = readNonBlankString("Name: ");
                     int sets = readPositiveInteger("Sets: ");
@@ -54,69 +64,83 @@ public class UserInterface {
                     double weight = readNonNegativeDouble("Weight: ");
                     String muscleGroup = readNonBlankString("Muscle Group: ");
 
-                    Exercise exerciseName = new Exercise(name, sets, reps, weight, muscleGroup);
-                    workout.addExercise(exerciseName);
+                    Exercise exercise = new Exercise(name, sets, reps, weight, muscleGroup);
+                    workout.addExercise(exercise);
 
-                    System.out.println();
-                    System.out.println("\u001B[32m" + "Exercise added" + "\u001B[0m");
-                    System.out.println();
+                    System.out.println(GREEN + "Exercise added" + RESET);
                     break;
+
                 case 2:
-                    if (workout.size() == 0) {
-                        noExercisesAddedErrorMessage();
+                    if (emptyWorkoutErrorMessage(workout)) {
                         return;
                     }
+                    System.out.println(CYAN + "\n=== Workout List ===" + RESET);
                     workout.printWorkout();
-                    System.out.println();
                     break;
 
                 case 3:
-                    if (workout.size() == 0) {
-                        noExercisesAddedErrorMessage();
+                    if (emptyWorkoutErrorMessage(workout)) {
                         return;
                     }
-                    System.out.println(workout.calculateTotalWorkoutVolume());
-
-                    System.out.println();
+                    prepareAnalytics(workout);
+                    System.out.println(CYAN + "Total Workout Volume: " + RESET +
+                            workout.calculateTotalWorkoutVolume() + " lbs");
                     break;
+
                 case 4:
-                    if (workout.size() == 0) {
-                        noExercisesAddedErrorMessage();
+                    if (emptyWorkoutErrorMessage(workout)) {
                         return;
                     }
+                    prepareAnalytics(workout);
                     Exercise highestVolume = engine.getHighestVolumeExercise();
-                    System.out.println(
-                            highestVolume.getName() + " had a volume of " + highestVolume.calculateTotalVolume());
-                    System.out.println();
+                    System.out.println(GREEN + highestVolume.getName() + RESET +
+                            " had a volume of " + highestVolume.calculateTotalVolume() + " lbs");
                     break;
+
                 case 5:
-                    if (workout.size() == 0) {
-                        noExercisesAddedErrorMessage();
+                    if (emptyWorkoutErrorMessage(workout)) {
                         return;
                     }
-                    Exercise e = workout.highestVolumeExercise();
-                    System.out.println(workout.getName() + ", Total Sets: " + workout.totalSets() + ", Total Reps: "
-                            + workout.totalReps() +
-                            "Total Volume: " + workout.calculateTotalWorkoutVolume() + e.getName()
-                            + " was your highest volume exercise with a volume of "
-                            + e.calculateTotalVolume());
-                            break;
-                default:
-                    System.out.println("Unknown command. Type 'help' to see available options");
-            }
-        } else
-            System.out.println("Invalid command number. Type 'help' to see valid commands.");
+                    prepareAnalytics(workout);
+                    Exercise e = engine.getHighestVolumeExercise();
 
+                    System.out.println(CYAN + "\n=== Workout Summary ===" + RESET);
+                    System.out.println("Workout: " + workout.getName());
+                    System.out.println("Total Sets: " + workout.totalSets());
+                    System.out.println("Total Reps: " + workout.totalReps());
+                    System.out.println("Total Volume: " + workout.calculateTotalWorkoutVolume() + " lbs");
+                    System.out.println("Highest Volume Exercise: " +
+                            GREEN + e.getName() + RESET +
+                            " (" + e.calculateTotalVolume() + " lbs)");
+                    break;
+
+                case 6:
+                    if (emptyWorkoutErrorMessage(workout)) {
+                        return;
+                    }
+                    prepareAnalytics(workout);
+                    showWorkoutAnalytics(workout);
+                    break;
+
+                default:
+                    System.out.println(RED + "Unknown command. Type 'help' to see available options" + RESET);
+            }
+
+        } else {
+            System.out.println(RED + "Invalid command number. Type 'help' to see valid commands." + RESET);
+        }
     }
 
     private void commandList() {
+        System.out.println(CYAN + "=== Commands ===" + RESET);
         System.out.println("1: Add exercise");
         System.out.println("2: List workout");
         System.out.println("3: Calculate total workout volume");
         System.out.println("4: Show highest volume exercise");
-        System.out.println("5: Print workout Summary");
-        System.out.println("help - List commands again ");
-        System.out.println("quit- Quits the program");
+        System.out.println("5: Print workout summary");
+        System.out.println("6: Show workout analytics");
+        System.out.println("help - List commands again");
+        System.out.println("quit - Quit the program");
     }
 
     private boolean isInteger(String input) {
@@ -130,11 +154,11 @@ public class UserInterface {
 
     private String readNonBlankString(String prompt) {
         while (true) {
-            System.out.print(prompt);
+            System.out.print(YELLOW + prompt + RESET);
             String input = scanner.nextLine();
 
             if (input.isBlank()) {
-                System.out.println("Please enter a non blank name");
+                System.out.println(RED + "Please enter a non blank name" + RESET);
                 continue;
             }
             return input;
@@ -143,18 +167,18 @@ public class UserInterface {
 
     private int readPositiveInteger(String prompt) {
         while (true) {
-            System.out.print(prompt);
+            System.out.print(YELLOW + prompt + RESET);
             String input = scanner.nextLine();
 
             if (!isInteger(input)) {
-                System.out.println("Please enter a whole number");
+                System.out.println(RED + "Please enter a whole number" + RESET);
                 continue;
             }
 
             int value = Integer.parseInt(input);
 
             if (value < 1) {
-                System.out.println("Please enter a positive number");
+                System.out.println(RED + "Please enter a positive number" + RESET);
                 continue;
             }
             return value;
@@ -163,26 +187,70 @@ public class UserInterface {
 
     private double readNonNegativeDouble(String prompt) {
         while (true) {
-            System.out.print(prompt);
+            System.out.print(YELLOW + prompt + RESET);
             String input = scanner.nextLine();
 
             try {
                 double weight = Double.parseDouble(input);
                 if (weight < 0) {
-                    System.out.println("Please enter a non negative number");
+                    System.out.println(RED + "Please enter a non negative number" + RESET);
                     continue;
                 }
                 return weight;
 
             } catch (NumberFormatException e) {
-                System.out.println("Please enter a number");
-                continue;
+                System.out.println(RED + "Please enter a number" + RESET);
             }
         }
     }
 
-    private void noExercisesAddedErrorMessage() {
-        System.out.println("\u001B[31m" + "No exercises are in the workout" + "\u001B[0m");
+    private boolean emptyWorkoutErrorMessage(Workout workout) {
+        if (workout.size() == 0) {
+            System.out.println(RED + "The workout has no exercises added." + RESET);
+            return true;
+        }
+        return false;
+    }
 
+    private void prepareAnalytics(Workout workout) {
+        engine.calculateVolumeBreakdown(workout);
+    }
+
+    private void showWorkoutAnalytics(Workout workout) {
+
+        System.out.println(CYAN + "\n=== Workout Analytics ===" + RESET);
+
+        var top3 = engine.topNExercises(workout, 3);
+        System.out.println(YELLOW + "Top 3 Exercises by Volume:" + RESET);
+        for (var entry : top3) {
+            System.out.println(" - " + entry.getKey().getName() + ": " + formatPercent(entry.getValue()));
+        }
+
+        var bottom3 = engine.bottomNExercises(workout, 3);
+
+        System.out.println(YELLOW + "\nBottom 3 Exercises by Volume:" + RESET);
+
+        if (bottom3.isEmpty()) {
+            System.out.println(RED + "  Not enough exercises to display the bottom 3." + RESET);
+        } else {
+            for (var entry : bottom3) {
+                System.out.println(" - " + entry.getKey().getName() + ": " + formatPercent(entry.getValue()));
+            }
+        }
+
+        var ppl = engine.volumePercentageSplit();
+        System.out.println(YELLOW + "\nPush / Pull / Legs Split:" + RESET);
+        System.out.println(" - Push: " + formatPercent(ppl.get("Push")));
+        System.out.println(" - Pull: " + formatPercent(ppl.get("Pull")));
+        System.out.println(" - Legs: " + formatPercent(ppl.get("Legs")));
+
+        Exercise highest = engine.getHighestVolumeExercise();
+        System.out.println(YELLOW + "\nHighest Volume Exercise:" + RESET);
+        System.out.println(" - " + GREEN + highest.getName() + RESET +
+                " (" + highest.calculateTotalVolume() + " lbs)");
+    }
+
+    private String formatPercent(double value) {
+        return String.format("%.2f%%", value * 100);
     }
 }

@@ -30,22 +30,12 @@ public class Workout {
         }
         return totalVolume;
     }
-    public Exercise highestVolumeExercise() {
-        Exercise exercise = exercises.get(0);
-
-        for (int ii = 0; ii < exercises.size(); ii++) {
-            double currentExerciseVolume = exercises.get(ii).calculateTotalVolume();
-            if (currentExerciseVolume > exercise.calculateTotalVolume()) {
-                exercise = exercises.get(ii);
-            }
-        }
-        return exercise;
-    }
 
     public void printWorkout() {
         int exerciseCounter = 1;
         for (Exercise e: exercises) {
-            System.out.println(exerciseCounter + ": " + e);
+            System.out.println(exerciseCounter +" " + e.toString());
+            exerciseCounter++;
         }
     }
     public int totalSets() {

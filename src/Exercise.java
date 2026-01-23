@@ -26,7 +26,7 @@ public class Exercise {
         this.sets = sets;
         this.reps = reps;
         this.weight = weight;
-        this.muscleGroup = muscleGroup;
+        this.muscleGroup = muscleGroup.toLowerCase();
     }
 
     public String getName() {
@@ -54,23 +54,20 @@ public class Exercise {
     }
 
     public String classifyExercise() {
-        String muscleGroup = this.muscleGroup.toLowerCase();
-        if (muscleGroup.equals("chest") || muscleGroup.equals("shoulders")
-                || muscleGroup.equals("triceps")) {
-            return "Push";
-        } else if (muscleGroup.equals("lats") || muscleGroup.equals("biceps")
-                || muscleGroup.contains("upper back") || muscleGroup.equals("erectors")) {
-                    return "Pull";
-                } else if (muscleGroup.equals("quads") || muscleGroup.equals("hamstrings")
-                || muscleGroup.equals("calves")) {
-                    return "Legs";
-                }
-                return "Other";
+        String muscleGroup = this.muscleGroup;
+
+          return switch (muscleGroup) {
+            case "chest", "shoulders", "triceps" -> "Push";
+            case "lats", "biceps", "erectors", "back", "traps" -> "Pull";
+            case "quads", "hamstrings", "calves", "glutes", "legs", "adductors", "abductors" -> "Legs";
+            default -> "Other";
+        };
+        
     }
 
     @Override
     public String toString() {
-        return name + " -  Sets: " + sets + ", Reps: " + reps + ", Weight: " + weight;
+        return name + " - " +"(" + sets + "x" + reps + " @ " + weight + " lbs)";
     }
 
 }
