@@ -1,14 +1,17 @@
-# Workout Volume Calculator
+# Workout Metrics v1 (Archived)
 
-A simple Java console app that will let users log exercises and calculate total workout volume.
+This was the original version of my workout volume calculator.  
+It allowed users to log exercises and calculate total workout volume.
+
+The upgraded and actively maintained version is now **Workout Metrics CLI**.
 
 ## Status
-Project setup in progress.
+Archived — replaced by Workout Metrics CLI.
 
-## Planned Features
-- Add exercises with sets, reps, and weight
+## Features (v1)
+- Log exercises with sets, reps, and weight
 - Calculate total workout volume
 - View a basic workout summary
 
 ## Tech Used
-- Java
+Java
